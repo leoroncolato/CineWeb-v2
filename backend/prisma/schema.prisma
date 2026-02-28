@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Filme {
+  id             Int       @id @default(autoincrement())
+  titulo         String
+  sinopse        String?   @db.Text
+  duracao        Int       // Em minutos
+  genero         String
+  classificacao  String
+  diretor        String
+  dataLancamento DateTime? @map("data_lancamento") @db.Date
+  cartazUrl      String?   @map("cartaz_url")
+  
+  // Relacionamento 1:N (Um filme tem várias sessões)
+  sessoes        Sessao[]
+
+  @@map("filmes") // Nome da tabela no banco
+}
+
+model Sala {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  capacidade Int
+  
+  // Relacionamento 1:N (Uma sala tem várias sessões)
+  sessoes    Sessao[]
+
+  @@map("salas")
+}
+
+model Sessao {
+  id            Int      @id @default(autoincrement())
+  filmeId       Int      @map("filme_id")
+  salaId        Int      @map("sala_id")
+  data          DateTime @db.Date
+  horario       String   // Armazenado como 'HH:MM'
+  valorIngresso Decimal  @map("valor_ingresso") @db.Decimal(10, 2)
+  
+  // Relacionamentos e Chaves Estrangeiras (Cascade garante exclusão em cascata)
+  filme         Filme    @relation(fields: [filmeId], references: [id], onDelete: Cascade)
+  sala          Sala     @relation(fields: [salaId], references: [id], onDelete: Cascade)
+  
+  // Relacionamento 1:N (Uma sessão tem vários ingressos vendidos)
+  ingressos     Ingresso[]
+
+  // Garante que a mesma sala não tenha duas sessões no mesmo dia e horário
+  @@unique([salaId, data, horario])
+  @@map("sessoes")
+}
+
+model Ingresso {
+  id            Int          @id @default(autoincrement())
+  sessaoId      Int          @map("sessao_id")
+  nomeComprador String       @map("nome_comprador")
+  tipoIngresso  TipoIngresso @map("tipo_ingresso")
+  valorPago     Decimal      @map("valor_pago") @db.Decimal(10, 2)
+  dataCompra    DateTime     @default(now()) @map("data_compra")
+  assento       String?
+  
+  // Relacionamento (Ingresso pertence a uma sessão)
+  sessao        Sessao       @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+  
+  // Para atrelar combos/produtos do cinema ao ingresso (Opcional)
+  pedidos       Pedido[]
+
+  @@map("ingressos")
+}
+
+// Enumeração para tipar rigidamente os tipos de ingressos possíveis
+enum TipoIngresso {
+  INTEIRA
+  MEIA
+}
+
+// (Opcional) Módulo de Bomboniere
+model LancheCombo {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  descricao  String?  @db.Text
+  preco      Decimal  @db.Decimal(10, 2)
+  imagemUrl  String?  @map("imagem_url")
+  
+  pedidos    Pedido[]
+
+  @@map("lanches_combos")
+}
+
+// Tabela pivô para associar Lanches a Ingressos
+model Pedido {
+  id         Int         @id @default(autoincrement())
+  ingressoId Int         @map("ingresso_id")
+  comboId    Int         @map("combo_id")
+  quantidade Int
+  
+  ingresso   Ingresso    @relation(fields: [ingressoId], references: [id], onDelete: Cascade)
+  combo      LancheCombo @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@map("pedidos")
+}
