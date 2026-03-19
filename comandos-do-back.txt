@@ -1,0 +1,9 @@
+npm install -D prisma
+npm install @prisma/cliente
+npm i @prisma/adapter-pg
+npm install -D dotenv
+npx prisma migrate-dev dev --name init
+npx prisma generate
+nest generate module prisma
+
+npm install class-validator class-transformer

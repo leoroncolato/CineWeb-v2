@@ -14,100 +14,124 @@ datasource db {
   provider = "postgresql"
 }
 
-model Filme {
-  id             Int       @id @default(autoincrement())
-  titulo         String
-  sinopse        String?   @db.Text
-  duracao        Int       // Em minutos
-  genero         String
-  classificacao  String
-  diretor        String
-  dataLancamento DateTime? @map("data_lancamento") @db.Date
-  cartazUrl      String?   @map("cartaz_url")
+model Cinema {
+  id          Int      @id @default(autoincrement()) // O diagrama pede 'long', no Prisma 'Int' ou 'BigInt' atendem bem.
+  nome        String
+  endereco    String   // Corrigi o erro de digitação da imagem ("enderco")
   
-  // Relacionamento 1:N (Um filme tem várias sessões)
-  sessoes        Sessao[]
+  // Relacionamentos vindos do losango preto (Composição/Agregação)
+  listaSalas  Sala[]
+  listaFilmes Filme[]
+  listaSessao Sessao[]
 
-  @@map("filmes") // Nome da tabela no banco
+  @@map("cinemas")
 }
 
 model Sala {
-  id         Int      @id @default(autoincrement())
-  nome       String
-  capacidade Int
+  id          Int      @id @default(autoincrement())
+  numero      Int
+  capacidade  Int
+  poltronas   Json     // aqui um JSON de matriz (ex: [[1,0],[1,1]])
   
-  // Relacionamento 1:N (Uma sala tem várias sessões)
-  sessoes    Sessao[]
+  // Relacionamento com Cinema
+  cinemaId    Int?
+  cinema      Cinema?  @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  
+  // Relacionamento com Sessão
+  sessoes     Sessao[]
 
   @@map("salas")
 }
 
-model Sessao {
-  id            Int      @id @default(autoincrement())
-  filmeId       Int      @map("filme_id")
-  salaId        Int      @map("sala_id")
-  data          DateTime @db.Date
-  horario       String   // Armazenado como 'HH:MM'
-  valorIngresso Decimal  @map("valor_ingresso") @db.Decimal(10, 2)
+// Enum para o Gênero do filme
+enum Genero {
+  ACAO
+  COMEDIA
+  DRAMA
+  TERROR
+  FICCAO
+}
+model Filme {
+  id                  Int       @id @default(autoincrement())
+  titulo              String
+  sinopse             String?   @db.Text
+  classificacao       String
+  duracao             DateTime  // O diagrama pede Date. (Obs: Para duração, 'Int' em minutos costuma ser melhor, mas mantive fiel à imagem).
+  elenco              String?   @db.Text
+  genero              Genero    // Alterado para usar o Enum conforme a imagem
+  dataInicialExibicao DateTime  @db.Date
+  dataFinalExibicao   DateTime  @db.Date
   
-  // Relacionamentos e Chaves Estrangeiras (Cascade garante exclusão em cascata)
-  filme         Filme    @relation(fields: [filmeId], references: [id], onDelete: Cascade)
-  sala          Sala     @relation(fields: [salaId], references: [id], onDelete: Cascade)
-  
-  // Relacionamento 1:N (Uma sessão tem vários ingressos vendidos)
-  ingressos     Ingresso[]
+  cinemaId            Int?
+  cinema              Cinema?   @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+  sessoes             Sessao[]
 
-  // Garante que a mesma sala não tenha duas sessões no mesmo dia e horário
-  @@unique([salaId, data, horario])
+  @@map("filmes")
+}
+
+
+model Sessao {
+  id               Int      @id @default(autoincrement())
+  horarioExibicao  DateTime 
+  filmeId          Int
+
+  filme            Filme    @relation(fields: [filmeId], references: [id], onDelete: Cascade)
+  
+  salaId           Int
+  sala             Sala     @relation(fields: [salaId], references: [id], onDelete: Cascade)
+
+  cinemaId         Int?
+  cinema           Cinema?  @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
+
+  ingressos        Ingresso[]
+
   @@map("sessoes")
 }
 
 model Ingresso {
-  id            Int          @id @default(autoincrement())
-  sessaoId      Int          @map("sessao_id")
-  nomeComprador String       @map("nome_comprador")
-  tipoIngresso  TipoIngresso @map("tipo_ingresso")
-  valorPago     Decimal      @map("valor_pago") @db.Decimal(10, 2)
-  dataCompra    DateTime     @default(now()) @map("data_compra")
-  assento       String?
+  id           Int      @id @default(autoincrement())
+  valorInteira Float    
+  valorMeia    Float
   
-  // Relacionamento (Ingresso pertence a uma sessão)
-  sessao        Sessao       @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+  sessaoId     Int
+  sessao       Sessao   @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
   
-  // Para atrelar combos/produtos do cinema ao ingresso (Opcional)
-  pedidos       Pedido[]
+  pedidoId     Int?
+  pedido       Pedido?  @relation(fields: [pedidoId], references: [id])
 
   @@map("ingressos")
 }
 
-// Enumeração para tipar rigidamente os tipos de ingressos possíveis
 enum TipoIngresso {
   INTEIRA
   MEIA
 }
 
-// (Opcional) Módulo de Bomboniere
 model LancheCombo {
-  id         Int      @id @default(autoincrement())
-  nome       String
-  descricao  String?  @db.Text
-  preco      Decimal  @db.Decimal(10, 2)
-  imagemUrl  String?  @map("imagem_url")
+  id            Int      @id @default(autoincrement())
+  nome          String
+  descricao     String?  @db.Text
+  valorUnitario Float
+  qtUnidade     Int
+  subtotal      Float
   
-  pedidos    Pedido[]
+  // Para atrelar ao Pedido 
+  pedidoId      Int?
+  pedido        Pedido?  @relation(fields: [pedidoId], references: [id])
 
   @@map("lanches_combos")
 }
 
 // Tabela pivô para associar Lanches a Ingressos
 model Pedido {
-  id         Int         @id @default(autoincrement())
-  ingressoId Int         @map("ingresso_id")
-  comboId    Int         @map("combo_id")
-  quantidade Int
-  
-  ingresso   Ingresso    @relation(fields: [ingressoId], references: [id], onDelete: Cascade)
-  combo      LancheCombo @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  id         Int           @id @default(autoincrement())
+  qtInteira  Int
+  qtMeia     Int
+  valorTotal Float
+
+  // Modelamos com 1:N (Um pedido tem vários ingressos e vários lanches).
+  ingressos  Ingresso[]
+  lanches    LancheCombo[]
 
   @@map("pedidos")
 }
