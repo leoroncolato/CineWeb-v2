@@ -1,0 +1,219 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+/* =========================================================================
+   DESIGN SYSTEM - CINEWEB PREMIUM DARK THEME
+   Palette provided: 
+   color1: #000000
+   color2: #ff8830
+   color3: #d1b8a0
+   color4: #aeced2
+   color5: #cbdcdf
+========================================================================= */
+
+:root {
+  --cw-bg: #000000;
+  --cw-accent: #ff8830;
+  --cw-accent-hover: #e57222;
+  --cw-text-secondary: #d1b8a0;
+  --cw-surface-light: #cbdcdf;
+  --cw-surface-medium: #aeced2;
+  
+  --cw-panel-bg: rgba(255, 255, 255, 0.05);
+  --cw-panel-border: rgba(255, 255, 255, 0.1);
+  --cw-text-primary: #ffffff;
+  
+  --cw-danger: #ff4d4d;
+  --cw-success: #00ff88;
+}
+
+body {
+  background-color: var(--cw-bg);
+  color: var(--cw-text-primary);
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--cw-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: var(--cw-accent-hover);
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: var(--cw-panel-bg);
+  border: 1px solid var(--cw-panel-border);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Custom Inputs */
+.form-control, .form-select {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid var(--cw-panel-border) !important;
+  color: var(--cw-text-primary) !important;
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--cw-accent) !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 136, 48, 0.25) !important;
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+  border-color: var(--cw-danger) !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 77, 77, 0.25) !important;
+}
+
+/* Custom Buttons */
+.btn-primary {
+  background-color: var(--cw-accent);
+  border-color: var(--cw-accent);
+  color: #000;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--cw-accent-hover);
+  border-color: var(--cw-accent-hover);
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 136, 48, 0.4);
+}
+
+.btn-outline-light {
+  border-radius: 8px;
+}
+
+/* Tables */
+.table {
+  color: var(--cw-text-primary);
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--cw-text-primary);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+  --bs-table-hover-color: var(--cw-text-primary);
+}
+
+.table th {
+  border-bottom: 2px solid var(--cw-accent);
+  color: var(--cw-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  border-bottom: 1px solid var(--cw-panel-border);
+  vertical-align: middle;
+}
+
+/* Modals */
+.modal-content {
+  background-color: #111;
+  border: 1px solid var(--cw-panel-border);
+  border-radius: 16px;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--cw-panel-border);
+}
+
+.modal-title {
+  color: var(--cw-accent);
+  font-weight: bold;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--cw-panel-border);
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #0a0a0a;
+  border-right: 1px solid var(--cw-panel-border);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-link {
+  color: var(--cw-text-secondary);
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--cw-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  color: var(--cw-text-primary);
+  border-left: 3px solid var(--cw-accent);
+  background-color: rgba(255, 136, 48, 0.1);
+  font-weight: 600;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+/* Layout Utilities */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--cw-text-primary);
+}
+
+.page-title span {
+  color: var(--cw-accent);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cw-bg); 
+}
+::-webkit-scrollbar-thumb {
+  background: #333; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cw-accent); 
+}
