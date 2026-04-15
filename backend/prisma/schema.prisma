@@ -90,6 +90,7 @@ model Sessao {
 
 model Ingresso {
   id           Int      @id @default(autoincrement())
+  tipo         TipoIngresso
   valorInteira Float    
   valorMeia    Float
   
